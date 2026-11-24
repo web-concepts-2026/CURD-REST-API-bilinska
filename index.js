@@ -85,12 +85,8 @@ fastify.patch('/items/:id', function(request, reply) {
         reply.code(400).send('Not changed')
         return
     }
-    if(title != undefined){
-        db.prepare(`UPDATE todo SET title = ? WHERE id= ?`).run(title, id)
-    }
-    if(isDone != undefined) {
-        db.prepare(`UPDATE todo SET isDone = ? WHERE id= ?`).run(isDone, id)
-    }
+
+    db.prepare(`UPDATE todo SET title = COALESCE(?, title), isDone = COALESCE(?, isDone) WHERE id= ?`).run(title ?? id, isDone ?? id, id)
     const changedItem = db.prepare(`SELECT * FROM todo WHERE id= ?`).get(id)
     reply.send(changedItem)
     }
